@@ -1,0 +1,6 @@
+{
+  "name": "Giorgi's Portfolio",
+  "description": "Personal web portfolio by Giorgi featuring upcoming websites marked Coming Soon, Georgian heritage, dark and light mode, multilingual support, and direct Gmail contact.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
