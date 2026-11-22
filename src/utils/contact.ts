@@ -1,5 +1,5 @@
 export const RECIPIENT_EMAIL = 'gmchedlishvilikhmaladze@gmail.com';
-export const FORMSUBMIT_ENDPOINT = `https://formsubmit.co/ajax/${RECIPIENT_EMAIL}`;
+export const CONTACT_API_ENDPOINT = '/api/contact';
 
 export interface ContactFormValues {
   name: string;
@@ -83,9 +83,30 @@ export function buildMailtoHref(params: BuildMailtoParams): string {
   return `mailto:${to}?${search.toString().replace(/\+/g, '%20')}`;
 }
 
+export function buildGmailComposeHref(params: BuildMailtoParams): string {
+  const to = params.to ?? RECIPIENT_EMAIL;
+  const cleanSubject = params.subject.trim();
+  const body = [
+    `Name: ${params.senderName.trim()}`,
+    `Email: ${params.senderEmail.trim()}`,
+    ``,
+    params.message.trim(),
+  ].join('\n');
+
+  const search = new URLSearchParams({
+    view: 'cm',
+    fs: '1',
+    to,
+    su: cleanSubject ? `[Portfolio] ${cleanSubject}` : 'Portfolio Inquiry',
+    body,
+  });
+
+  return `https://mail.google.com/mail/?${search.toString().replace(/\+/g, '%20')}`;
+}
+
 export interface SubmitContactResult {
   ok: boolean;
-  needsActivation?: boolean;
+  notConfigured?: boolean;
   error?: string;
 }
 
@@ -96,7 +117,7 @@ export async function submitContactForm(
   fetchImpl: FetchLike = fetch
 ): Promise<SubmitContactResult> {
   try {
-    const response = await fetchImpl(FORMSUBMIT_ENDPOINT, {
+    const response = await fetchImpl(CONTACT_API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -105,33 +126,25 @@ export async function submitContactForm(
       body: JSON.stringify({
         name: values.name.trim(),
         email: values.email.trim(),
-        _replyto: values.email.trim(),
         subject: values.subject.trim(),
-        _subject: `[Portfolio] ${values.subject.trim()}`,
         message: values.message.trim(),
-        _template: 'table',
       }),
     });
 
     const data = (await response.json().catch(() => null)) as {
-      success?: boolean | string;
-      message?: string;
+      ok?: boolean;
+      notConfigured?: boolean;
+      error?: string;
     } | null;
 
-    const succeeded =
-      response.ok && (data?.success === true || data?.success === 'true');
-
-    if (succeeded) {
+    if (response.ok && data?.ok === true) {
       return { ok: true };
     }
 
-    const rawMessage = data?.message || `Request failed (${response.status})`;
-    const needsActivation = /activat/i.test(rawMessage);
-
     return {
       ok: false,
-      needsActivation,
-      error: rawMessage,
+      notConfigured: Boolean(data?.notConfigured) || response.status === 404,
+      error: data?.error || `Request failed (${response.status})`,
     };
   } catch (error) {
     return {

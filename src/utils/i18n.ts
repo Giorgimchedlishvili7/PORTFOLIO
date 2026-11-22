@@ -82,6 +82,7 @@ export interface TranslationDictionary {
       messagePlaceholder: string;
       submitButton: string;
       sendingButton: string;
+      openGmailWebButton: string;
       openMailAppButton: string;
       errors: {
         nameRequired: string;
@@ -94,8 +95,7 @@ export interface TranslationDictionary {
     feedback: {
       sentTitle: string;
       sentBody: string;
-      activationTip: string;
-      needsActivationMessage: string;
+      notConfiguredMessage: string;
       sendAnother: string;
       errorPrefix: string;
     };
@@ -176,6 +176,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
         messagePlaceholder: 'Write your message here...',
         submitButton: "Send to Giorgi's Gmail",
         sendingButton: 'Sending...',
+        openGmailWebButton: 'Send via Gmail',
         openMailAppButton: 'Open in Email App',
         errors: {
           nameRequired: 'Please enter your name.',
@@ -187,11 +188,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
       },
       feedback: {
         sentTitle: 'Message sent to Gmail',
-        sentBody: 'Your message has been sent to gmchedlishvilikhmaladze@gmail.com.',
-        activationTip: 'Note for the site owner: on the very first submission from a new domain, check gmchedlishvilikhmaladze@gmail.com (including Spam) to confirm FormSubmit’s one-time activation link.',
-        needsActivationMessage: 'Form delivery needs one-time activation in gmchedlishvilikhmaladze@gmail.com. Check that inbox for the activation email, or click Open in Email App below.',
+        sentBody: 'Your message has been delivered to gmchedlishvilikhmaladze@gmail.com.',
+        notConfiguredMessage: 'Automatic server delivery is not active yet. Click "Send via Gmail" or "Open in Email App" below to send your pre-filled message directly to gmchedlishvilikhmaladze@gmail.com.',
         sendAnother: 'Write Another Message',
-        errorPrefix: 'Could not send directly:',
+        errorPrefix: 'Could not send automatically:',
       },
     },
     footer: {
@@ -268,6 +268,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
         messagePlaceholder: 'დაწერეთ თქვენი შეტყობინება აქ...',
         submitButton: 'გაგზავნა გიორგის Gmail-ზე',
         sendingButton: 'იგზავნება...',
+        openGmailWebButton: 'გაგზავნა Gmail-ით',
         openMailAppButton: 'ელფოსტის აპში გახსნა',
         errors: {
           nameRequired: 'გთხოვთ შეიყვანოთ თქვენი სახელი.',
@@ -280,10 +281,9 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
       feedback: {
         sentTitle: 'შეტყობინება გაგზავნილია Gmail-ზე',
         sentBody: 'თქვენი წერილი გაიგზავნა მისამართზე gmchedlishvilikhmaladze@gmail.com.',
-        activationTip: 'შენიშვნა საიტის მფლობელისთვის: ახალ დომენზე პირველი გაგზავნისას შეამოწმეთ gmchedlishvilikhmaladze@gmail.com (სპამიც) ერთჯერადი აქტივაციის ბმულის დასადასტურებლად.',
-        needsActivationMessage: 'ფორმას სჭირდება ერთჯერადი აქტივაცია მისამართზე gmchedlishvilikhmaladze@gmail.com. შეამოწმეთ ელფოსტა ან გამოიყენეთ ელფოსტის აპი.',
+        notConfiguredMessage: 'ავტომატური სერვერული გაგზავნა ჯერ არ არის ჩართული. დააჭირეთ „გაგზავნა Gmail-ით“ ან „ელფოსტის აპში გახსნა“ თქვენი წერილის პირდაპირ გასაგზავნად.',
         sendAnother: 'კიდევ ერთი წერილის დაწერა',
-        errorPrefix: 'პირდაპირი გაგზავნა ვერ მოხერხდა:',
+        errorPrefix: 'ავტომატური გაგზავნა ვერ მოხერხდა:',
       },
     },
     footer: {
@@ -360,6 +360,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
         messagePlaceholder: 'Schreibe deine Nachricht hier...',
         submitButton: 'An Giorgis Gmail senden',
         sendingButton: 'Wird gesendet...',
+        openGmailWebButton: 'Über Gmail senden',
         openMailAppButton: 'In E-Mail-App öffnen',
         errors: {
           nameRequired: 'Bitte gib deinen Namen ein.',
@@ -371,11 +372,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
       },
       feedback: {
         sentTitle: 'Nachricht an Gmail gesendet',
-        sentBody: 'Deine Nachricht wurde an gmchedlishvilikhmaladze@gmail.com gesendet.',
-        activationTip: 'Hinweis für den Inhaber: Bei der allerersten Anfrage von einer neuen Domain prüfe bitte gmchedlishvilikhmaladze@gmail.com (auch Spam) für die einmalige Aktivierung.',
-        needsActivationMessage: 'Das Formular benötigt eine einmalige Aktivierung unter gmchedlishvilikhmaladze@gmail.com. Prüfe dein Postfach oder nutze die E-Mail-App.',
+        sentBody: 'Deine Nachricht wurde an gmchedlishvilikhmaladze@gmail.com zugestellt.',
+        notConfiguredMessage: 'Der automatische Serverversand ist noch nicht aktiviert. Klicke unten auf „Über Gmail senden“ oder „In E-Mail-App öffnen“, um deine vorbereitete Nachricht direkt zu senden.',
         sendAnother: 'Weitere Nachricht schreiben',
-        errorPrefix: 'Direktversand fehlgeschlagen:',
+        errorPrefix: 'Automatischer Versand fehlgeschlagen:',
       },
     },
     footer: {
@@ -452,6 +452,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
         messagePlaceholder: 'Escribe tu mensaje aquí...',
         submitButton: 'Enviar al Gmail de Giorgi',
         sendingButton: 'Enviando...',
+        openGmailWebButton: 'Enviar por Gmail',
         openMailAppButton: 'Abrir en App de Correo',
         errors: {
           nameRequired: 'Por favor escribe tu nombre.',
@@ -463,11 +464,10 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
       },
       feedback: {
         sentTitle: 'Mensaje enviado a Gmail',
-        sentBody: 'Tu mensaje fue enviado a gmchedlishvilikhmaladze@gmail.com.',
-        activationTip: 'Nota para el propietario: en el primer envío desde un dominio nuevo, revisa gmchedlishvilikhmaladze@gmail.com (incluido Spam) para confirmar el enlace de activación.',
-        needsActivationMessage: 'El formulario requiere activación única en gmchedlishvilikhmaladze@gmail.com. Revisa ese correo o usa Abrir en App de Correo.',
+        sentBody: 'Tu mensaje fue entregado a gmchedlishvilikhmaladze@gmail.com.',
+        notConfiguredMessage: 'El envío automático del servidor aún no está activo. Haz clic en "Enviar por Gmail" o "Abrir en App de Correo" abajo para enviar tu mensaje prellenado directamente.',
         sendAnother: 'Escribir Otro Mensaje',
-        errorPrefix: 'No se pudo enviar directamente:',
+        errorPrefix: 'No se pudo enviar automáticamente:',
       },
     },
     footer: {

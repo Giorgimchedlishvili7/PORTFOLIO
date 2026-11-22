@@ -1,13 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  FORMSUBMIT_ENDPOINT,
+  CONTACT_API_ENDPOINT,
   RECIPIENT_EMAIL,
+  buildGmailComposeHref,
   buildMailtoHref,
   submitContactForm,
   validateContactForm,
   type FetchLike,
 } from './contact';
+import { deliverContactEmail } from '../server/contactMailer';
 import { LANGUAGES, TRANSLATIONS } from './i18n';
 import { GEORGIA_FLAG_IMAGE } from './projects';
 
@@ -54,17 +56,17 @@ test('validateContactForm accepts complete valid payload', () => {
   assert.deepEqual(result.errors, {});
 });
 
-test('submitContactForm sends JSON payload to FormSubmit for Giorgi Gmail without sign-in', async () => {
+test('submitContactForm posts to /api/contact and returns ok only on real server confirmation', async () => {
   let capturedUrl = '';
   let capturedBody: Record<string, string> = {};
 
   const mockFetch: FetchLike = async (input, init) => {
     capturedUrl = String(input);
     capturedBody = JSON.parse(String(init?.body ?? '{}'));
-    return new Response(
-      JSON.stringify({ success: 'true', message: 'Sent' }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ ok: true, provider: 'gmail-smtp' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
   };
 
   const result = await submitContactForm(
@@ -78,18 +80,19 @@ test('submitContactForm sends JSON payload to FormSubmit for Giorgi Gmail withou
   );
 
   assert.equal(result.ok, true);
-  assert.equal(capturedUrl, FORMSUBMIT_ENDPOINT);
+  assert.equal(capturedUrl, CONTACT_API_ENDPOINT);
   assert.equal(capturedBody.name, 'გიორგი სტუმარი');
-  assert.equal(capturedBody._replyto, 'visitor@example.com');
-  assert.equal(capturedBody._subject, '[Portfolio] გამარჯობა');
+  assert.equal(capturedBody.email, 'visitor@example.com');
+  assert.equal(capturedBody.subject, 'გამარჯობა');
 });
 
-test('submitContactForm surfaces one-time activation instructions when returned', async () => {
+test('submitContactForm never claims success when /api/contact returns notConfigured', async () => {
   const mockFetch: FetchLike = async () =>
     new Response(
       JSON.stringify({
-        success: 'false',
-        message: 'This form needs Activation. Check your email.',
+        ok: false,
+        notConfigured: true,
+        error: 'Direct email server delivery is not configured yet.',
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
@@ -99,45 +102,80 @@ test('submitContactForm surfaces one-time activation instructions when returned'
       name: 'Levan',
       email: 'levan@example.com',
       subject: 'Hello',
-      message: 'Testing activation',
+      message: 'Testing unconfigured',
     },
     mockFetch
   );
 
   assert.equal(result.ok, false);
-  assert.equal(result.needsActivation, true);
+  assert.equal(result.notConfigured, true);
 });
 
-test('submitContactForm handles network errors cleanly without throwing', async () => {
-  const failingFetch: FetchLike = async () => {
-    throw new Error('Offline');
-  };
-
-  const result = await submitContactForm(
+test('deliverContactEmail returns ok:false notConfigured when no mail credentials exist', async () => {
+  const result = await deliverContactEmail(
     {
-      name: 'Levan',
-      email: 'levan@example.com',
+      name: 'Nino',
+      email: 'nino@example.com',
       subject: 'Hello',
-      message: 'Testing offline',
+      message: 'Checking config',
     },
-    failingFetch
+    {}
   );
-
   assert.equal(result.ok, false);
-  assert.equal(result.error, 'Offline');
+  assert.equal(result.status, 200);
+  assert.equal(result.notConfigured, true);
 });
 
-test('buildMailtoHref encodes recipient, subject, and body cleanly', () => {
-  const href = buildMailtoHref({
+test('deliverContactEmail validates payload and sends via Resend when RESEND_API_KEY is set', async () => {
+  const badResult = await deliverContactEmail(
+    { name: '', email: 'bad', subject: '', message: '' },
+    { RESEND_API_KEY: 're_test_123' }
+  );
+  assert.equal(badResult.ok, false);
+  assert.equal(badResult.status, 400);
+
+  let sentTo: string[] = [];
+  const okResult = await deliverContactEmail(
+    {
+      name: 'Nino',
+      email: 'nino@example.com',
+      subject: 'Question',
+      message: 'Real message',
+    },
+    { RESEND_API_KEY: 're_test_123' },
+    async (_url, init) => {
+      const payload = JSON.parse(String(init?.body ?? '{}'));
+      sentTo = payload.to;
+      return new Response(JSON.stringify({ id: 'email_1' }), { status: 200 });
+    }
+  );
+  assert.equal(okResult.ok, true);
+  assert.equal(okResult.provider, 'resend');
+  assert.deepEqual(sentTo, [RECIPIENT_EMAIL]);
+});
+
+test('buildMailtoHref and buildGmailComposeHref encode recipient, subject, and body cleanly', () => {
+  const mailto = buildMailtoHref({
     senderName: 'Levan',
     senderEmail: 'levan@example.com',
     subject: 'Website Question',
-    message: 'When will the studio website launch?',
+    message: 'Hello Giorgi!',
   });
+  assert.equal(mailto.startsWith(`mailto:${RECIPIENT_EMAIL}?`), true);
+  assert.equal(mailto.includes('Website%20Question'), true);
 
-  assert.equal(href.startsWith(`mailto:${RECIPIENT_EMAIL}?`), true);
-  assert.equal(href.includes('Website%20Question'), true);
-  assert.equal(href.includes('levan%40example.com'), true);
+  const gmail = buildGmailComposeHref({
+    senderName: 'Levan',
+    senderEmail: 'levan@example.com',
+    subject: 'Website Question',
+    message: 'Hello Giorgi!',
+  });
+  assert.equal(
+    gmail.startsWith('https://mail.google.com/mail/?view=cm&fs=1&to='),
+    true
+  );
+  assert.equal(gmail.includes(encodeURIComponent(RECIPIENT_EMAIL)), true);
+  assert.equal(gmail.includes('Website%20Question'), true);
 });
 
 test('all supported languages include required welcome, coming soon, and contact copy', () => {
@@ -151,6 +189,7 @@ test('all supported languages include required welcome, coming soon, and contact
     assert.ok(dict.hero.headline.length > 0);
     assert.ok(dict.websites.comingSoon.length > 0);
     assert.ok(dict.contact.form.submitButton.length > 0);
+    assert.ok(dict.contact.form.openGmailWebButton.length > 0);
   }
 });
 

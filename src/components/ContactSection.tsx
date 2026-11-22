@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react';
-import { Check, Copy, Mail, Send } from 'lucide-react';
+import { Check, Copy, ExternalLink, Mail, Send } from 'lucide-react';
 import {
   RECIPIENT_EMAIL,
+  buildGmailComposeHref,
   buildMailtoHref,
   submitContactForm,
   validateContactForm,
@@ -26,7 +27,7 @@ export function ContactSection({ t }: ContactSectionProps) {
 
   const [isSending, setIsSending] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
-  const [needsActivation, setNeedsActivation] = useState(false);
+  const [notConfigured, setNotConfigured] = useState(false);
   const [isSent, setIsSent] = useState(false);
 
   const handleCopyEmail = async () => {
@@ -48,13 +49,13 @@ export function ContactSection({ t }: ContactSectionProps) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
     if (sendError) setSendError(null);
-    if (needsActivation) setNeedsActivation(false);
+    if (notConfigured) setNotConfigured(false);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSendError(null);
-    setNeedsActivation(false);
+    setNotConfigured(false);
 
     const validation = validateContactForm(values, t.contact.form.errors);
     if (!validation.isValid) {
@@ -74,10 +75,10 @@ export function ContactSection({ t }: ContactSectionProps) {
       return;
     }
 
-    if (result.needsActivation) {
-      setNeedsActivation(true);
+    if (result.notConfigured) {
+      setNotConfigured(true);
     }
-    setSendError(result.error || 'Unknown error');
+    setSendError(result.error || 'Delivery failed.');
   };
 
   const mailtoHref = buildMailtoHref({
@@ -88,10 +89,18 @@ export function ContactSection({ t }: ContactSectionProps) {
     message: values.message,
   });
 
+  const gmailComposeHref = buildGmailComposeHref({
+    to: RECIPIENT_EMAIL,
+    senderName: values.name,
+    senderEmail: values.email,
+    subject: values.subject,
+    message: values.message,
+  });
+
   const handleResetSent = () => {
     setIsSent(false);
     setSendError(null);
-    setNeedsActivation(false);
+    setNotConfigured(false);
   };
 
   return (
@@ -162,9 +171,6 @@ export function ContactSection({ t }: ContactSectionProps) {
                   </h3>
                   <p className="text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
                     {t.contact.feedback.sentBody}
-                  </p>
-                  <p className="text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">
-                    {t.contact.feedback.activationTip}
                   </p>
                 </div>
                 <button
@@ -308,21 +314,23 @@ export function ContactSection({ t }: ContactSectionProps) {
                 </div>
 
                 {sendError && (
-                  <p
+                  <div
                     role="alert"
-                    className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-xs font-medium leading-relaxed text-[#D91E2A] dark:border-red-900/50 dark:bg-red-950/30 dark:text-[#F87171]"
+                    className="rounded-xl border border-red-200 bg-red-50/70 px-4 py-3 text-xs leading-relaxed text-[#D91E2A] dark:border-red-900/50 dark:bg-red-950/25 dark:text-[#F87171]"
                   >
-                    {needsActivation
-                      ? t.contact.feedback.needsActivationMessage
-                      : `${t.contact.feedback.errorPrefix} ${sendError}`}
-                  </p>
+                    <p className="font-medium">
+                      {notConfigured
+                        ? t.contact.feedback.notConfiguredMessage
+                        : `${t.contact.feedback.errorPrefix} ${sendError}`}
+                    </p>
+                  </div>
                 )}
 
-                <div className="flex flex-wrap items-center gap-3 pt-1">
+                <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
                   <button
                     type="submit"
                     disabled={isSending}
-                    className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-[#D91E2A] px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#B91822] disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D91E2A] whitespace-nowrap shrink-0 dark:bg-[#E12D39] dark:hover:bg-[#C81E2A]"
+                    className="inline-flex min-h-[42px] items-center gap-2 rounded-lg bg-[#D91E2A] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#B91822] disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D91E2A] whitespace-nowrap shrink-0 dark:bg-[#E12D39] dark:hover:bg-[#C81E2A]"
                   >
                     <Send className="h-4 w-4" aria-hidden="true" />
                     <span>
@@ -332,13 +340,25 @@ export function ContactSection({ t }: ContactSectionProps) {
                     </span>
                   </button>
 
-                  <a
-                    href={mailtoHref}
-                    className="inline-flex min-h-[44px] items-center gap-2 rounded-lg border border-zinc-300 bg-zinc-50 px-5 py-3 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D91E2A] whitespace-nowrap shrink-0 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
-                  >
-                    <Mail className="h-4 w-4" aria-hidden="true" />
-                    <span>{t.contact.form.openMailAppButton}</span>
-                  </a>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <a
+                      href={gmailComposeHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-[42px] items-center gap-1.5 rounded-lg border border-zinc-300 bg-zinc-50 px-3.5 py-2.5 text-xs font-medium text-zinc-900 transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D91E2A] whitespace-nowrap shrink-0 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span>{t.contact.form.openGmailWebButton}</span>
+                    </a>
+
+                    <a
+                      href={mailtoHref}
+                      className="inline-flex min-h-[42px] items-center gap-1.5 rounded-lg border border-zinc-300 bg-zinc-50 px-3.5 py-2.5 text-xs font-medium text-zinc-900 transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D91E2A] whitespace-nowrap shrink-0 sm:text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                    >
+                      <Mail className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span>{t.contact.form.openMailAppButton}</span>
+                    </a>
+                  </div>
                 </div>
               </form>
             )}
