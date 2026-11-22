@@ -1,4 +1,5 @@
 export const RECIPIENT_EMAIL = 'gmchedlishvilikhmaladze@gmail.com';
+export const FORMSUBMIT_ENDPOINT = `https://formsubmit.co/ajax/${RECIPIENT_EMAIL}`;
 
 export interface ContactFormValues {
   name: string;
@@ -56,31 +57,7 @@ export function validateContactForm(
   };
 }
 
-function toBase64Utf8(input: string): string {
-  const bytes = new TextEncoder().encode(input);
-  let binary = '';
-  for (let i = 0; i < bytes.length; i += 1) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  if (typeof btoa === 'function') {
-    return btoa(binary);
-  }
-  return Buffer.from(bytes).toString('base64');
-}
-
-function toBase64UrlUtf8(input: string): string {
-  return toBase64Utf8(input)
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/g, '');
-}
-
-export function encodeMimeHeaderUtf8(value: string): string {
-  const sanitized = value.replace(/[\r\n]+/g, ' ').trim();
-  return `=?UTF-8?B?${toBase64Utf8(sanitized)}?=`;
-}
-
-export interface BuildMimeParams {
+export interface BuildMailtoParams {
   to?: string;
   senderName: string;
   senderEmail: string;
@@ -88,34 +65,7 @@ export interface BuildMimeParams {
   message: string;
 }
 
-export function buildMimeMessage(params: BuildMimeParams): string {
-  const to = params.to ?? RECIPIENT_EMAIL;
-  const cleanName = params.senderName.replace(/[\r\n"]+/g, ' ').trim();
-  const cleanEmail = params.senderEmail.replace(/[\r\n<>]+/g, '').trim();
-  const cleanSubject = params.subject.replace(/[\r\n]+/g, ' ').trim();
-
-  const bodyLines = [
-    `Portfolio Contact Message`,
-    `Sender Name: ${cleanName}`,
-    `Sender Email: ${cleanEmail}`,
-    ``,
-    params.message.trim(),
-  ].join('\r\n');
-
-  const headers = [
-    `To: ${to}`,
-    `Reply-To: "${cleanName}" <${cleanEmail}>`,
-    `Subject: ${encodeMimeHeaderUtf8(`[Portfolio] ${cleanSubject}`)}`,
-    `MIME-Version: 1.0`,
-    `Content-Type: text/plain; charset="UTF-8"`,
-    `Content-Transfer-Encoding: base64`,
-  ];
-
-  const mime = `${headers.join('\r\n')}\r\n\r\n${toBase64Utf8(bodyLines)}`;
-  return toBase64UrlUtf8(mime);
-}
-
-export function buildMailtoHref(params: BuildMimeParams): string {
+export function buildMailtoHref(params: BuildMailtoParams): string {
   const to = params.to ?? RECIPIENT_EMAIL;
   const cleanSubject = params.subject.trim();
   const body = [
@@ -126,10 +76,67 @@ export function buildMailtoHref(params: BuildMimeParams): string {
   ].join('\n');
 
   const search = new URLSearchParams({
-    subject: `[Portfolio] ${cleanSubject}`,
+    subject: cleanSubject ? `[Portfolio] ${cleanSubject}` : 'Portfolio Inquiry',
     body,
   });
 
-  // URLSearchParams encodes spaces as '+', while mailto clients expect '%20'
   return `mailto:${to}?${search.toString().replace(/\+/g, '%20')}`;
+}
+
+export interface SubmitContactResult {
+  ok: boolean;
+  needsActivation?: boolean;
+  error?: string;
+}
+
+export type FetchLike = typeof fetch;
+
+export async function submitContactForm(
+  values: ContactFormValues,
+  fetchImpl: FetchLike = fetch
+): Promise<SubmitContactResult> {
+  try {
+    const response = await fetchImpl(FORMSUBMIT_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        name: values.name.trim(),
+        email: values.email.trim(),
+        _replyto: values.email.trim(),
+        subject: values.subject.trim(),
+        _subject: `[Portfolio] ${values.subject.trim()}`,
+        message: values.message.trim(),
+        _template: 'table',
+      }),
+    });
+
+    const data = (await response.json().catch(() => null)) as {
+      success?: boolean | string;
+      message?: string;
+    } | null;
+
+    const succeeded =
+      response.ok && (data?.success === true || data?.success === 'true');
+
+    if (succeeded) {
+      return { ok: true };
+    }
+
+    const rawMessage = data?.message || `Request failed (${response.status})`;
+    const needsActivation = /activat/i.test(rawMessage);
+
+    return {
+      ok: false,
+      needsActivation,
+      error: rawMessage,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: error instanceof Error ? error.message : 'Network error',
+    };
+  }
 }

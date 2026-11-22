@@ -1,10 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  FORMSUBMIT_ENDPOINT,
   RECIPIENT_EMAIL,
   buildMailtoHref,
-  buildMimeMessage,
+  submitContactForm,
   validateContactForm,
+  type FetchLike,
 } from './contact';
 import { LANGUAGES, TRANSLATIONS } from './i18n';
 import { GEORGIA_FLAG_IMAGE } from './projects';
@@ -52,22 +54,77 @@ test('validateContactForm accepts complete valid payload', () => {
   assert.deepEqual(result.errors, {});
 });
 
-test('buildMimeMessage produces valid base64url MIME targeting Giorgi Gmail with UTF-8 Georgian support', () => {
-  const raw = buildMimeMessage({
-    senderName: 'გიორგი მომხმარებელი',
-    senderEmail: 'visitor@example.com',
-    subject: 'გამარჯობა გიორგი',
-    message: 'მოგესალმებით საქართველოდან!',
-  });
+test('submitContactForm sends JSON payload to FormSubmit for Giorgi Gmail without sign-in', async () => {
+  let capturedUrl = '';
+  let capturedBody: Record<string, string> = {};
 
-  assert.equal(/^[A-Za-z0-9_-]+$/.test(raw), true);
+  const mockFetch: FetchLike = async (input, init) => {
+    capturedUrl = String(input);
+    capturedBody = JSON.parse(String(init?.body ?? '{}'));
+    return new Response(
+      JSON.stringify({ success: 'true', message: 'Sent' }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  };
 
-  const normalized = raw.replace(/-/g, '+').replace(/_/g, '/');
-  const decodedMime = Buffer.from(normalized, 'base64').toString('utf8');
-  assert.match(decodedMime, new RegExp(`To: ${RECIPIENT_EMAIL}`));
-  assert.match(decodedMime, /Reply-To: "გიორგი მომხმარებელი" <visitor@example\.com>/);
-  assert.match(decodedMime, /Subject: =\?UTF-8\?B\?/);
-  assert.match(decodedMime, /Content-Type: text\/plain; charset="UTF-8"/);
+  const result = await submitContactForm(
+    {
+      name: 'გიორგი სტუმარი',
+      email: 'visitor@example.com',
+      subject: 'გამარჯობა',
+      message: 'მოგესალმებით!',
+    },
+    mockFetch
+  );
+
+  assert.equal(result.ok, true);
+  assert.equal(capturedUrl, FORMSUBMIT_ENDPOINT);
+  assert.equal(capturedBody.name, 'გიორგი სტუმარი');
+  assert.equal(capturedBody._replyto, 'visitor@example.com');
+  assert.equal(capturedBody._subject, '[Portfolio] გამარჯობა');
+});
+
+test('submitContactForm surfaces one-time activation instructions when returned', async () => {
+  const mockFetch: FetchLike = async () =>
+    new Response(
+      JSON.stringify({
+        success: 'false',
+        message: 'This form needs Activation. Check your email.',
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+
+  const result = await submitContactForm(
+    {
+      name: 'Levan',
+      email: 'levan@example.com',
+      subject: 'Hello',
+      message: 'Testing activation',
+    },
+    mockFetch
+  );
+
+  assert.equal(result.ok, false);
+  assert.equal(result.needsActivation, true);
+});
+
+test('submitContactForm handles network errors cleanly without throwing', async () => {
+  const failingFetch: FetchLike = async () => {
+    throw new Error('Offline');
+  };
+
+  const result = await submitContactForm(
+    {
+      name: 'Levan',
+      email: 'levan@example.com',
+      subject: 'Hello',
+      message: 'Testing offline',
+    },
+    failingFetch
+  );
+
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'Offline');
 });
 
 test('buildMailtoHref encodes recipient, subject, and body cleanly', () => {

@@ -70,12 +70,7 @@ export interface TranslationDictionary {
     directEmailLabel: string;
     copyEmail: string;
     copiedEmail: string;
-    gmailHeading: string;
-    gmailConnectedAs: string;
-    gmailSignOut: string;
-    gmailNotConnectedHint: string;
-    signInWithGoogle: string;
-    signingIn: string;
+    directMailAppHint: string;
     form: {
       nameLabel: string;
       namePlaceholder: string;
@@ -86,6 +81,7 @@ export interface TranslationDictionary {
       messageLabel: string;
       messagePlaceholder: string;
       submitButton: string;
+      sendingButton: string;
       openMailAppButton: string;
       errors: {
         nameRequired: string;
@@ -95,28 +91,13 @@ export interface TranslationDictionary {
         messageRequired: string;
       };
     };
-    confirmModal: {
-      title: string;
-      description: string;
-      toLabel: string;
-      fromLabel: string;
-      replyToLabel: string;
-      subjectLabel: string;
-      messageLabel: string;
-      cancel: string;
-      confirmSend: string;
-      sending: string;
-      needGoogleTitle: string;
-      needGoogleDesc: string;
-      signInAndContinue: string;
-      useMailAppInstead: string;
-    };
     feedback: {
       sentTitle: string;
       sentBody: string;
+      activationTip: string;
+      needsActivationMessage: string;
       sendAnother: string;
       errorPrefix: string;
-      mailAppOpened: string;
     };
   };
   footer: {
@@ -179,16 +160,11 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
     },
     contact: {
       sectionTitle: 'Send a Message',
-      sectionLead: 'Write your name, email, subject, and message below to send directly to my Gmail.',
+      sectionLead: 'Write your name, email, subject, and message below to send directly to my Gmail — no sign-in required.',
       directEmailLabel: 'Direct Gmail Address',
       copyEmail: 'Copy email',
       copiedEmail: 'Copied',
-      gmailHeading: 'Gmail Connection',
-      gmailConnectedAs: 'Connected via Google as',
-      gmailSignOut: 'Sign out',
-      gmailNotConnectedHint: 'Sign in with Google to send directly through Gmail, or use your local email app after filling out the form.',
-      signInWithGoogle: 'Sign in with Google',
-      signingIn: 'Signing in...',
+      directMailAppHint: 'You can submit the form directly or open the message in your email app anytime.',
       form: {
         nameLabel: 'Your Name',
         namePlaceholder: 'Giorgi or your full name',
@@ -199,6 +175,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
         messageLabel: 'Message',
         messagePlaceholder: 'Write your message here...',
         submitButton: "Send to Giorgi's Gmail",
+        sendingButton: 'Sending...',
         openMailAppButton: 'Open in Email App',
         errors: {
           nameRequired: 'Please enter your name.',
@@ -208,28 +185,13 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
           messageRequired: 'Please write your message.',
         },
       },
-      confirmModal: {
-        title: 'Confirm Email to Gmail',
-        description: 'Review your message before sending it to Giorgi.',
-        toLabel: 'To',
-        fromLabel: 'Gmail Account',
-        replyToLabel: 'Sender',
-        subjectLabel: 'Subject',
-        messageLabel: 'Message',
-        cancel: 'Cancel',
-        confirmSend: 'Confirm & Send',
-        sending: 'Sending via Gmail...',
-        needGoogleTitle: 'Choose How to Send',
-        needGoogleDesc: 'Connect your Google account to send directly through the Gmail API, or open this pre-filled message in your default email app.',
-        signInAndContinue: 'Sign in with Google & Send',
-        useMailAppInstead: 'Open in Email App',
-      },
       feedback: {
         sentTitle: 'Message sent to Gmail',
-        sentBody: 'Your email has been delivered to gmchedlishvilikhmaladze@gmail.com.',
+        sentBody: 'Your message has been sent to gmchedlishvilikhmaladze@gmail.com.',
+        activationTip: 'Note for the site owner: on the very first submission from a new domain, check gmchedlishvilikhmaladze@gmail.com (including Spam) to confirm FormSubmit’s one-time activation link.',
+        needsActivationMessage: 'Form delivery needs one-time activation in gmchedlishvilikhmaladze@gmail.com. Check that inbox for the activation email, or click Open in Email App below.',
         sendAnother: 'Write Another Message',
-        errorPrefix: 'Could not send via Gmail:',
-        mailAppOpened: 'Prepared your message for your default email app addressed to gmchedlishvilikhmaladze@gmail.com.',
+        errorPrefix: 'Could not send directly:',
       },
     },
     footer: {
@@ -290,16 +252,11 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
     },
     contact: {
       sectionTitle: 'მომწერეთ შეტყობინება',
-      sectionLead: 'შეიყვანეთ თქვენი სახელი, ელფოსტა, თემა და ტექსტი, რათა პირდაპირ ჩემს Gmail-ზე მოვიდეს.',
+      sectionLead: 'შეიყვანეთ თქვენი სახელი, ელფოსტა, თემა და ტექსტი, რათა პირდაპირ ჩემს Gmail-ზე მოვიდეს — ავტორიზაციის გარეშე.',
       directEmailLabel: 'პირდაპირი Gmail მისამართი',
       copyEmail: 'კოპირება',
       copiedEmail: 'დაკოპირდა',
-      gmailHeading: 'Gmail კავშირი',
-      gmailConnectedAs: 'დაკავშირებულია Google-ით:',
-      gmailSignOut: 'გასვლა',
-      gmailNotConnectedHint: 'გაიარეთ ავტორიზაცია Google-ით Gmail-ით გასაგზავნად, ან გამოიყენეთ თქვენი ელფოსტის აპლიკაცია.',
-      signInWithGoogle: 'Sign in with Google',
-      signingIn: 'ავტორიზაცია...',
+      directMailAppHint: 'შეგიძლიათ გააგზავნოთ პირდაპირ ფორმით ან გახსნათ თქვენს ელფოსტის აპლიკაციაში.',
       form: {
         nameLabel: 'თქვენი სახელი',
         namePlaceholder: 'შეიყვანეთ სახელი',
@@ -310,6 +267,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
         messageLabel: 'ტექსტი',
         messagePlaceholder: 'დაწერეთ თქვენი შეტყობინება აქ...',
         submitButton: 'გაგზავნა გიორგის Gmail-ზე',
+        sendingButton: 'იგზავნება...',
         openMailAppButton: 'ელფოსტის აპში გახსნა',
         errors: {
           nameRequired: 'გთხოვთ შეიყვანოთ თქვენი სახელი.',
@@ -319,28 +277,13 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
           messageRequired: 'გთხოვთ დაწეროთ შეტყობინების ტექსტი.',
         },
       },
-      confirmModal: {
-        title: 'დაადასტურეთ გაგზავნა Gmail-ით',
-        description: 'გადაამოწმეთ შეტყობინება გაგზავნამდე.',
-        toLabel: 'მიმღები',
-        fromLabel: 'Gmail ანგარიში',
-        replyToLabel: 'გამომგზავნი',
-        subjectLabel: 'თემა',
-        messageLabel: 'ტექსტი',
-        cancel: 'გაუქმება',
-        confirmSend: 'დადასტურება და გაგზავნა',
-        sending: 'იგზავნება Gmail-ით...',
-        needGoogleTitle: 'აირჩიეთ გაგზავნის გზა',
-        needGoogleDesc: 'შედით Google ანგარიშით პირდაპირ Gmail-ით გასაგზავნად, ან გახსენით შეტყობინება თქვენი ელფოსტის აპლიკაციაში.',
-        signInAndContinue: 'Google-ით შესვლა და გაგზავნა',
-        useMailAppInstead: 'ელფოსტის აპში გახსნა',
-      },
       feedback: {
         sentTitle: 'შეტყობინება გაგზავნილია Gmail-ზე',
-        sentBody: 'თქვენი წერილი წარმატებით გაიგზავნა მისამართზე gmchedlishvilikhmaladze@gmail.com.',
+        sentBody: 'თქვენი წერილი გაიგზავნა მისამართზე gmchedlishvilikhmaladze@gmail.com.',
+        activationTip: 'შენიშვნა საიტის მფლობელისთვის: ახალ დომენზე პირველი გაგზავნისას შეამოწმეთ gmchedlishvilikhmaladze@gmail.com (სპამიც) ერთჯერადი აქტივაციის ბმულის დასადასტურებლად.',
+        needsActivationMessage: 'ფორმას სჭირდება ერთჯერადი აქტივაცია მისამართზე gmchedlishvilikhmaladze@gmail.com. შეამოწმეთ ელფოსტა ან გამოიყენეთ ელფოსტის აპი.',
         sendAnother: 'კიდევ ერთი წერილის დაწერა',
-        errorPrefix: 'Gmail-ით გაგზავნა ვერ მოხერხდა:',
-        mailAppOpened: 'შეტყობინება მომზადდა თქვენს ელფოსტის აპში მისამართზე gmchedlishvilikhmaladze@gmail.com.',
+        errorPrefix: 'პირდაპირი გაგზავნა ვერ მოხერხდა:',
       },
     },
     footer: {
@@ -401,16 +344,11 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
     },
     contact: {
       sectionTitle: 'Nachricht senden',
-      sectionLead: 'Gib deinen Namen, deine E-Mail-Adresse, den Betreff und deinen Text ein, um direkt an mein Gmail zu senden.',
+      sectionLead: 'Gib deinen Namen, deine E-Mail-Adresse, den Betreff und deinen Text ein, um direkt an mein Gmail zu senden — ganz ohne Anmeldung.',
       directEmailLabel: 'Direkte Gmail-Adresse',
       copyEmail: 'Kopieren',
       copiedEmail: 'Kopiert',
-      gmailHeading: 'Gmail-Verbindung',
-      gmailConnectedAs: 'Verbunden über Google als',
-      gmailSignOut: 'Abmelden',
-      gmailNotConnectedHint: 'Melde dich mit Google an, um direkt über Gmail zu senden, oder öffne dein E-Mail-Programm.',
-      signInWithGoogle: 'Sign in with Google',
-      signingIn: 'Anmeldung...',
+      directMailAppHint: 'Du kannst das Formular direkt absenden oder die Nachricht jederzeit in deiner E-Mail-App öffnen.',
       form: {
         nameLabel: 'Dein Name',
         namePlaceholder: 'Vor- und Nachname',
@@ -421,6 +359,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
         messageLabel: 'Nachricht',
         messagePlaceholder: 'Schreibe deine Nachricht hier...',
         submitButton: 'An Giorgis Gmail senden',
+        sendingButton: 'Wird gesendet...',
         openMailAppButton: 'In E-Mail-App öffnen',
         errors: {
           nameRequired: 'Bitte gib deinen Namen ein.',
@@ -430,28 +369,13 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
           messageRequired: 'Bitte schreibe eine Nachricht.',
         },
       },
-      confirmModal: {
-        title: 'E-Mail an Gmail bestätigen',
-        description: 'Prüfe deine Nachricht vor dem Versand an Giorgi.',
-        toLabel: 'An',
-        fromLabel: 'Gmail-Konto',
-        replyToLabel: 'Absender',
-        subjectLabel: 'Betreff',
-        messageLabel: 'Nachricht',
-        cancel: 'Abbrechen',
-        confirmSend: 'Bestätigen & Senden',
-        sending: 'Wird über Gmail gesendet...',
-        needGoogleTitle: 'Versandart wählen',
-        needGoogleDesc: 'Verbinde dein Google-Konto für den direkten Versand über die Gmail-API oder öffne die Nachricht in deiner E-Mail-App.',
-        signInAndContinue: 'Mit Google anmelden & senden',
-        useMailAppInstead: 'In E-Mail-App öffnen',
-      },
       feedback: {
         sentTitle: 'Nachricht an Gmail gesendet',
-        sentBody: 'Deine E-Mail wurde an gmchedlishvilikhmaladze@gmail.com zugestellt.',
+        sentBody: 'Deine Nachricht wurde an gmchedlishvilikhmaladze@gmail.com gesendet.',
+        activationTip: 'Hinweis für den Inhaber: Bei der allerersten Anfrage von einer neuen Domain prüfe bitte gmchedlishvilikhmaladze@gmail.com (auch Spam) für die einmalige Aktivierung.',
+        needsActivationMessage: 'Das Formular benötigt eine einmalige Aktivierung unter gmchedlishvilikhmaladze@gmail.com. Prüfe dein Postfach oder nutze die E-Mail-App.',
         sendAnother: 'Weitere Nachricht schreiben',
-        errorPrefix: 'Gmail-Versand fehlgeschlagen:',
-        mailAppOpened: 'Nachricht für deine Standard-E-Mail-App an gmchedlishvilikhmaladze@gmail.com vorbereitet.',
+        errorPrefix: 'Direktversand fehlgeschlagen:',
       },
     },
     footer: {
@@ -512,16 +436,11 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
     },
     contact: {
       sectionTitle: 'Enviar un Mensaje',
-      sectionLead: 'Escribe tu nombre, tu correo, el asunto y el texto para enviarlo directamente a mi Gmail.',
+      sectionLead: 'Escribe tu nombre, tu correo, el asunto y el texto para enviarlo directamente a mi Gmail — sin iniciar sesión.',
       directEmailLabel: 'Correo Directo de Gmail',
       copyEmail: 'Copiar',
       copiedEmail: 'Copiado',
-      gmailHeading: 'Conexión con Gmail',
-      gmailConnectedAs: 'Conectado con Google como',
-      gmailSignOut: 'Cerrar sesión',
-      gmailNotConnectedHint: 'Inicia sesión con Google para enviar directamente por Gmail, o abre tu aplicación de correo.',
-      signInWithGoogle: 'Sign in with Google',
-      signingIn: 'Iniciando sesión...',
+      directMailAppHint: 'Puedes enviar el formulario directamente o abrir el mensaje en tu aplicación de correo.',
       form: {
         nameLabel: 'Tu Nombre',
         namePlaceholder: 'Tu nombre completo',
@@ -532,6 +451,7 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
         messageLabel: 'Texto del Mensaje',
         messagePlaceholder: 'Escribe tu mensaje aquí...',
         submitButton: 'Enviar al Gmail de Giorgi',
+        sendingButton: 'Enviando...',
         openMailAppButton: 'Abrir en App de Correo',
         errors: {
           nameRequired: 'Por favor escribe tu nombre.',
@@ -541,28 +461,13 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
           messageRequired: 'Por favor escribe tu mensaje.',
         },
       },
-      confirmModal: {
-        title: 'Confirmar Envío a Gmail',
-        description: 'Revisa tu mensaje antes de enviarlo a Giorgi.',
-        toLabel: 'Para',
-        fromLabel: 'Cuenta de Gmail',
-        replyToLabel: 'Remitente',
-        subjectLabel: 'Asunto',
-        messageLabel: 'Mensaje',
-        cancel: 'Cancelar',
-        confirmSend: 'Confirmar y Enviar',
-        sending: 'Enviando por Gmail...',
-        needGoogleTitle: 'Elige Cómo Enviar',
-        needGoogleDesc: 'Conecta tu cuenta de Google para enviar directamente mediante Gmail o abre este mensaje en tu aplicación de correo.',
-        signInAndContinue: 'Iniciar sesión con Google y Enviar',
-        useMailAppInstead: 'Abrir en App de Correo',
-      },
       feedback: {
         sentTitle: 'Mensaje enviado a Gmail',
-        sentBody: 'Tu correo fue entregado a gmchedlishvilikhmaladze@gmail.com.',
+        sentBody: 'Tu mensaje fue enviado a gmchedlishvilikhmaladze@gmail.com.',
+        activationTip: 'Nota para el propietario: en el primer envío desde un dominio nuevo, revisa gmchedlishvilikhmaladze@gmail.com (incluido Spam) para confirmar el enlace de activación.',
+        needsActivationMessage: 'El formulario requiere activación única en gmchedlishvilikhmaladze@gmail.com. Revisa ese correo o usa Abrir en App de Correo.',
         sendAnother: 'Escribir Otro Mensaje',
-        errorPrefix: 'No se pudo enviar por Gmail:',
-        mailAppOpened: 'Mensaje preparado en tu app de correo para gmchedlishvilikhmaladze@gmail.com.',
+        errorPrefix: 'No se pudo enviar directamente:',
       },
     },
     footer: {
